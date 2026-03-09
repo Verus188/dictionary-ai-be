@@ -22,7 +22,7 @@ export class OpenRouterService {
       );
     }
 
-    const selectedModel = 'mistralai/mistral-small-3.2-24b-instruct:free';
+    const selectedModel = 'stepfun/step-3.5-flash:free';
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30_000);
@@ -33,9 +33,6 @@ export class OpenRouterService {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
-          'HTTP-Referer':
-            process.env.OPENROUTER_HTTP_REFERER ?? 'http://localhost:3000',
-          'X-Title': process.env.OPENROUTER_X_TITLE ?? 'Dictionary AI Backend',
         },
         body: JSON.stringify({
           model: selectedModel,
