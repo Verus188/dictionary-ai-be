@@ -2,6 +2,7 @@ import {
   BadGatewayException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
@@ -14,6 +15,8 @@ interface GeminiGenerateParams {
 
 @Injectable()
 export class GeminiService {
+  private readonly logger = new Logger(GeminiService.name);
+
   async generate({ prompt, model, temperature }: GeminiGenerateParams) {
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -51,6 +54,7 @@ export class GeminiService {
         text,
       };
     } catch (error) {
+      this.logger.error('gemeni failed', error);
       if (error instanceof BadGatewayException) {
         throw error;
       }

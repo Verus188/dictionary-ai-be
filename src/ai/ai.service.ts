@@ -30,20 +30,20 @@ export class AiService {
       }
     }
 
+    // try {
+    //   return await this.geminiService.generate({
+    //     prompt,
+    //     temperature: request.temperature,
+    //   });
+    // } catch {
     try {
-      return await this.geminiService.generate({
+      return await this.openRouterService.generate({
         prompt,
         temperature: request.temperature,
       });
     } catch {
-      try {
-        return await this.openRouterService.generate({
-          prompt,
-          temperature: request.temperature,
-        });
-      } catch {
-        throw new BadGatewayException('Both Gemini and OpenRouter failed');
-      }
+      throw new BadGatewayException('Both Gemini and OpenRouter failed');
     }
   }
 }
+// }

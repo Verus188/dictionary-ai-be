@@ -2,7 +2,9 @@ import {
   BadGatewayException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
+import axios from 'axios';
 
 interface OpenRouterGenerateParams {
   prompt: string;
@@ -11,6 +13,7 @@ interface OpenRouterGenerateParams {
 
 @Injectable()
 export class OpenRouterService {
+  private readonly logger = new Logger(OpenRouterService.name);
   private readonly endpoint = 'https://openrouter.ai/api/v1/chat/completions';
 
   async generate({ prompt, temperature }: OpenRouterGenerateParams) {
@@ -22,19 +25,23 @@ export class OpenRouterService {
       );
     }
 
-    const selectedModel = 'stepfun/step-3.5-flash:free';
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30_000);
+    const selectedModel = [
+      'openrouter/hunter-alpha',
+      'openrouter/healer-alpha',
+      'nvidia/nemotron-3-super-120b-a12b:free',
+      'stepfun/step-3.5-flash:free',
+    ][0];
 
     try {
-      const response = await fetch(this.endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
+      const response = await axios.post<{
+        choices?: Array<{
+          message?: {
+            content?: string | Array<{ type?: string; text?: string }>;
+          };
+        }>;
+      }>(
+        this.endpoint,
+        {
           model: selectedModel,
           messages: [
             {
@@ -43,25 +50,17 @@ export class OpenRouterService {
             },
           ],
           temperature,
-        }),
-        signal: controller.signal,
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          timeout: 30_000,
+        },
+      );
 
-      if (!response.ok) {
-        const errorPayload = await response.text();
-        throw new BadGatewayException(
-          `OpenRouter request failed with status ${response.status}: ${errorPayload}`,
-        );
-      }
-
-      const data = (await response.json()) as {
-        choices?: Array<{
-          message?: {
-            content?: string | Array<{ type?: string; text?: string }>;
-          };
-        }>;
-      };
-
+      const data = response.data;
       const rawContent = data.choices?.[0]?.message?.content;
       const text =
         typeof rawContent === 'string'
@@ -82,12 +81,33 @@ export class OpenRouterService {
       };
     } catch (error) {
       if (error instanceof BadGatewayException) {
+        this.logger.error('OpenRouter failed', error.stack);
         throw error;
       }
 
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const errorPayload =
+          typeof error.response?.data === 'string'
+            ? error.response.data
+            : JSON.stringify(error.response?.data);
+
+        this.logger.error(
+          `OpenRouter request failed. status=${status ?? 'unknown'} model=${selectedModel}`,
+          error.stack,
+        );
+
+        if (error.code === 'ECONNABORTED') {
+          throw new BadGatewayException('OpenRouter request timed out');
+        }
+
+        throw new BadGatewayException(
+          `OpenRouter request failed with status ${status ?? 'unknown'}: ${errorPayload}`,
+        );
+      }
+
+      this.logger.error('OpenRouter failed', JSON.stringify(error));
       throw new BadGatewayException('Failed to call OpenRouter provider');
-    } finally {
-      clearTimeout(timeoutId);
     }
   }
 }
