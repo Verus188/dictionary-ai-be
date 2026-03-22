@@ -168,7 +168,9 @@ export class AiService {
     return this.normalizeStoryChunk(parsed);
   }
 
-  private parseStoryChunkVariantsResponse(rawText: string): StoryChunkVariantsDto {
+  private parseStoryChunkVariantsResponse(
+    rawText: string,
+  ): StoryChunkVariantsDto {
     const parsed = this.parseJson(rawText);
 
     if (!this.isStoryChunkVariantsDto(parsed)) {
@@ -212,7 +214,7 @@ export class AiService {
     throw new BadGatewayException('AI returned invalid JSON');
   }
 
-  private tryParseJson(value: string): unknown | null {
+  private tryParseJson(value: string): unknown {
     try {
       return JSON.parse(value);
     } catch {
@@ -238,7 +240,9 @@ export class AiService {
     );
   }
 
-  private isStoryChunkVariantsDto(value: unknown): value is StoryChunkVariantsDto {
+  private isStoryChunkVariantsDto(
+    value: unknown,
+  ): value is StoryChunkVariantsDto {
     if (!value || typeof value !== 'object') {
       return false;
     }

@@ -30,10 +30,9 @@ export const getStoryInitializationPrompt = (
     Narrative Style: ${settings.narrativeStyle}.
     Tone: ${settings.tone}.`;
 
-  const storyPromptFinal =
-    settings.prompt?.trim()
-      ? `Also follow this additional user prompt: ${settings.prompt.trim()}`
-      : '';
+  const storyPromptFinal = settings.prompt?.trim()
+    ? `Also follow this additional user prompt: ${settings.prompt.trim()}`
+    : '';
 
   return [
     systemPrompt,
