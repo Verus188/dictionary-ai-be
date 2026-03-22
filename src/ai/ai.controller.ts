@@ -1,13 +1,18 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AiService } from './ai.service';
-import { GenerateAiDto } from './dto/generate-ai.dto';
+import { ContinueStoryRequestDto, InitStoryRequestDto } from './dto/story.dto';
 
 @Controller('ai')
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
-  @Post('generate')
-  generate(@Body() body: GenerateAiDto) {
-    return this.aiService.generate(body);
+  @Post('story/init')
+  initStory(@Body() body: InitStoryRequestDto) {
+    return this.aiService.initStory(body);
+  }
+
+  @Post('story/continue')
+  continueStory(@Body() body: ContinueStoryRequestDto) {
+    return this.aiService.continueStory(body);
   }
 }

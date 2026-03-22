@@ -1,4 +1,8 @@
-import { ChunkActions, DictionaryCardInfo } from '../model/types';
+import {
+  DictionaryCardDto,
+  StoryActionsDto,
+  StorySettingsDto,
+} from '../dto/story.dto';
 
 /**
  * Возвращает промпт для составления продолжения истории
@@ -13,39 +17,35 @@ import { ChunkActions, DictionaryCardInfo } from '../model/types';
 export const getStoryContinuationPrompt = (
   story: string,
   systemPrompt: string,
-  actions?: ChunkActions,
-  continuationSize?: string,
-  language?: string,
-  languageDifficulty?: string,
-  dictionaryCards?: DictionaryCardInfo[],
+  settings: StorySettingsDto,
+  actions: StoryActionsDto,
+  dictionaryCards: DictionaryCardDto[],
 ) => {
-  const actionsPrompt = actions
-    ? `action-1: ${actions?.action1},\naction-2: ${actions?.action2}`
-    : '';
-  const languagePrompt = language ? 'The story have to be in ' + language : '';
-  const continuationSizePrompt = continuationSize
-    ? `The continuation of the story should be about ${continuationSize} characters.`
-    : '';
+  const actionsPrompt = `action1: ${actions.action1}\naction2: ${actions.action2}`;
+  const languagePrompt = `The continuations must be written in ${settings.educationLanguage}.`;
+  const continuationSizePrompt = `Each continuation should be about ${settings.chunkLength} characters.`;
 
-  const languageDifficultyPrompt = languageDifficulty
-    ? `Use the language complexity level = ${languageDifficulty}, where 1 is the simplest and 6 is the most complex.
+  const languageDifficultyPrompt = `Use the language complexity level = ${settings.storyLanguageDifficulty}, where 1 is the simplest and 6 is the most complex.
 	1.	Very simple language — short sentences, basic words, minimal descriptions (suitable for children).
 	2.	Simple language — slightly longer sentences, easy vocabulary, simple imagery.
 	3.	Intermediate level — everyday conversational style, clear language, a moderate amount of detail.
 	4.	Advanced level — more complex sentences, diverse vocabulary, metaphors and descriptions.
 	5.	Complex level — rich literary language, rare words, long sentences, sophisticated structures.
-	6.	Very complex language — almost academic style, high density of metaphors and literary devices, abundance of details.`
-    : '';
+	6.	Very complex language — almost academic style, high density of metaphors and literary devices, abundance of details.`;
 
-  const dictionaryCardsPrompt = dictionaryCards
+  const dictionaryCardsPrompt = dictionaryCards.length
     ? `Use the following words and phrases in continuation: ${dictionaryCards
-        .map((card) => card.card)
+        .map((card) => card.text)
         .join(', ')}`
     : '';
 
   return [
+    'Current story:',
     story,
+    '',
+    'Selected actions:',
     actionsPrompt,
+    '',
     systemPrompt,
     continuationSizePrompt,
     languagePrompt,
