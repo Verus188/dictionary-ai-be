@@ -15,6 +15,8 @@ import { GeminiService } from './providers/gemini.service';
 import { OpenRouterService } from './providers/openrouter.service';
 import { getStoryContinuationPrompt } from './prompts/get-story-continuation-prompt';
 import { getStoryInitializationPrompt } from './prompts/get-story-initialization-prompt';
+import { isStoryContinuationResponse } from './prompts/story-continuation-system-prompt';
+import { isStoryInitializationResponse } from './prompts/story-initialization-system-prompt';
 import { storyContinuationSystemPrompt } from './prompts/story-continuation-system-prompt';
 import { storyInitializationSystemPrompt } from './prompts/story-initialization-system-prompt';
 
@@ -164,7 +166,7 @@ export class AiService {
   private parseStoryChunkResponse(rawText: string): StoryChunkDto {
     const parsed = this.parseJson(rawText);
 
-    if (!this.isStoryChunkDto(parsed)) {
+    if (!isStoryInitializationResponse(parsed)) {
       throw new BadGatewayException(
         'AI returned an invalid story initialization payload',
       );
@@ -178,7 +180,7 @@ export class AiService {
   ): StoryChunkVariantsDto {
     const parsed = this.parseJson(rawText);
 
-    if (!this.isStoryChunkVariantsDto(parsed)) {
+    if (!isStoryContinuationResponse(parsed)) {
       throw new BadGatewayException(
         'AI returned an invalid story continuation payload',
       );
@@ -225,39 +227,6 @@ export class AiService {
     } catch {
       return null;
     }
-  }
-
-  private isStoryChunkDto(value: unknown): value is StoryChunkDto {
-    if (!value || typeof value !== 'object') {
-      return false;
-    }
-
-    const candidate = value as StoryChunkDto;
-
-    return (
-      typeof candidate.text === 'string' &&
-      !!candidate.text.trim() &&
-      !!candidate.actions &&
-      typeof candidate.actions.action1 === 'string' &&
-      !!candidate.actions.action1.trim() &&
-      typeof candidate.actions.action2 === 'string' &&
-      !!candidate.actions.action2.trim()
-    );
-  }
-
-  private isStoryChunkVariantsDto(
-    value: unknown,
-  ): value is StoryChunkVariantsDto {
-    if (!value || typeof value !== 'object') {
-      return false;
-    }
-
-    const candidate = value as StoryChunkVariantsDto;
-
-    return (
-      this.isStoryChunkDto(candidate.chunk1) &&
-      this.isStoryChunkDto(candidate.chunk2)
-    );
   }
 
   private normalizeStoryChunk(chunk: StoryChunkDto): StoryChunkDto {

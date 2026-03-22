@@ -1,3 +1,38 @@
+import { StoryChunkVariantsDto } from '../dto/story.dto';
+import { isStoryInitializationResponse } from './story-initialization-system-prompt';
+
+export const storyContinuationResponseExample: StoryChunkVariantsDto = {
+  chunk1: {
+    text: 'continuation for action1',
+    actions: {
+      action1: 'short action',
+      action2: 'short action',
+    },
+  },
+  chunk2: {
+    text: 'continuation for action2',
+    actions: {
+      action1: 'short action',
+      action2: 'short action',
+    },
+  },
+};
+
+export const isStoryContinuationResponse = (
+  value: unknown,
+): value is StoryChunkVariantsDto => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as StoryChunkVariantsDto;
+
+  return (
+    isStoryInitializationResponse(candidate.chunk1) &&
+    isStoryInitializationResponse(candidate.chunk2)
+  );
+};
+
 export const storyContinuationSystemPrompt = `
 You are a storyteller. Continue the story in two different branches.
 
@@ -7,22 +42,7 @@ The input includes:
 - action2, which must be reflected in chunk2
 
 Return only valid JSON with this exact shape:
-{
-  "chunk1": {
-    "text": "continuation for action1",
-    "actions": {
-      "action1": "short action",
-      "action2": "short action"
-    }
-  },
-  "chunk2": {
-    "text": "continuation for action2",
-    "actions": {
-      "action1": "short action",
-      "action2": "short action"
-    }
-  }
-}
+${JSON.stringify(storyContinuationResponseExample, null, 2)}
 
 Rules:
 - Do not wrap the JSON in markdown fences.
