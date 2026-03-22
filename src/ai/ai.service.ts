@@ -87,15 +87,11 @@ export class AiService {
 
     const requiredStringFields: Array<keyof StorySettingsDto> = [
       'educationLanguage',
-      'character',
       'setting',
-      'plotMotif',
-      'narrativeStyle',
-      'tone',
     ];
 
     for (const field of requiredStringFields) {
-      if (!settings[field]?.toString().trim()) {
+      if (!this.isNonEmptyString(settings[field])) {
         throw new BadRequestException(`${field} is required`);
       }
     }
@@ -117,11 +113,13 @@ export class AiService {
       );
     }
 
-    if (!Array.isArray(settings.genres) || settings.genres.length === 0) {
-      throw new BadRequestException('genres must be a non-empty array');
+    if (!Array.isArray(settings.genres)) {
+      throw new BadRequestException('genres must be an array');
     }
 
-    const hasEmptyGenre = settings.genres.some((genre) => !genre?.trim());
+    const hasEmptyGenre = settings.genres.some(
+      (genre) => !this.isNonEmptyString(genre),
+    );
 
     if (hasEmptyGenre) {
       throw new BadRequestException('genres must contain non-empty strings');
@@ -134,7 +132,11 @@ export class AiService {
     }
 
     const hasInvalidCard = cards.some(
-      (card) => !card?.id?.trim() || !card?.text?.trim(),
+      (card) =>
+        !card ||
+        typeof card !== 'object' ||
+        !this.isNonEmptyString(card.id) ||
+        !this.isNonEmptyString(card.text),
     );
 
     if (hasInvalidCard) {
@@ -149,7 +151,10 @@ export class AiService {
       throw new BadRequestException('actions is required');
     }
 
-    if (!actions.action1?.trim() || !actions.action2?.trim()) {
+    if (
+      !this.isNonEmptyString(actions.action1) ||
+      !this.isNonEmptyString(actions.action2)
+    ) {
       throw new BadRequestException(
         'actions.action1 and actions.action2 are required',
       );
@@ -263,5 +268,9 @@ export class AiService {
         action2: chunk.actions.action2.trim(),
       },
     };
+  }
+
+  private isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value.trim().length > 0;
   }
 }

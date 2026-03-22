@@ -22,13 +22,24 @@ export const getStoryInitializationPrompt = (
         .join(', ')}`
     : '';
 
-  const tagsPrompt = `The story should include the following elements:
-    Character: ${settings.character}.
-    Genres: ${settings.genres.join(', ')}.
-    Setting: ${settings.setting}.
-    Plot Motif: ${settings.plotMotif}.
-    Narrative Style: ${settings.narrativeStyle}.
-    Tone: ${settings.tone}.`;
+  const tags = [
+    settings.character?.trim()
+      ? `Character: ${settings.character.trim()}.`
+      : '',
+    settings.genres.length ? `Genres: ${settings.genres.join(', ')}.` : '',
+    `Setting: ${settings.setting}.`,
+    settings.plotMotif?.trim()
+      ? `Plot Motif: ${settings.plotMotif.trim()}.`
+      : '',
+    settings.narrativeStyle?.trim()
+      ? `Narrative Style: ${settings.narrativeStyle.trim()}.`
+      : '',
+    settings.tone?.trim() ? `Tone: ${settings.tone.trim()}.` : '',
+  ].filter(Boolean);
+
+  const tagsPrompt = tags.length
+    ? ['The story should include the following elements:', ...tags].join('\n')
+    : '';
 
   const storyPromptFinal = settings.prompt?.trim()
     ? `Also follow this additional user prompt: ${settings.prompt.trim()}`
