@@ -19,7 +19,8 @@ export const getStoryInitializationPrompt = (
   const dictionaryCardsPrompt = dictionaryCards.length
     ? `Use the following dictionary cards naturally in the story when possible: ${dictionaryCards
         .map((card) => card.text)
-        .join(', ')}`
+        .join(', ')}.
+If any card is not written in ${settings.educationLanguage}, adapt it into ${settings.educationLanguage} before using it in the story.`
     : '';
 
   const tags = [

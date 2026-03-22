@@ -36,7 +36,8 @@ export const getStoryContinuationPrompt = (
   const dictionaryCardsPrompt = dictionaryCards.length
     ? `Use the following words and phrases in continuation: ${dictionaryCards
         .map((card) => card.text)
-        .join(', ')}`
+        .join(', ')}.
+If any card is not written in ${settings.educationLanguage}, adapt it into ${settings.educationLanguage} before using it in the continuation.`
     : '';
 
   return [
