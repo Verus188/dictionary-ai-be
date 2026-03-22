@@ -16,6 +16,8 @@ export class OpenRouterService {
   private readonly logger = new Logger(OpenRouterService.name);
   private readonly endpoint = 'https://openrouter.ai/api/v1/chat/completions';
   private readonly models = [
+    'deepseek/deepseek-v3.2',
+    'google/gemini-3-flash-preview',
     'openrouter/hunter-alpha',
     'openrouter/healer-alpha',
     'nvidia/nemotron-3-super-120b-a12b:free',
