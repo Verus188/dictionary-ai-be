@@ -1,4 +1,4 @@
-import { StoryChunkDto } from '../dto/story.dto';
+import { StoryChunkDto } from '../../presentation/dto/story.dto';
 
 export const storyInitializationResponseExample: StoryChunkDto = {
   text: 'story chunk',

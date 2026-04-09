@@ -2,7 +2,7 @@ import {
   DictionaryCardDto,
   StoryActionsDto,
   StorySettingsDto,
-} from '../dto/story.dto';
+} from '../../presentation/dto/story.dto';
 
 /**
  * Возвращает промпт для составления продолжения истории

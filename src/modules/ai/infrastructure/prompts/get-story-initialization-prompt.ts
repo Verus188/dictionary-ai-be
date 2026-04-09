@@ -1,4 +1,7 @@
-import { DictionaryCardDto, StorySettingsDto } from '../dto/story.dto';
+import {
+  DictionaryCardDto,
+  StorySettingsDto,
+} from '../../presentation/dto/story.dto';
 
 export const getStoryInitializationPrompt = (
   systemPrompt: string,

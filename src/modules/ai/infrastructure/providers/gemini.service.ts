@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 
@@ -17,8 +18,10 @@ interface GeminiGenerateParams {
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
 
+  constructor(private readonly configService: ConfigService) {}
+
   async generate({ prompt, model, temperature }: GeminiGenerateParams) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
 
     if (!apiKey) {
       throw new InternalServerErrorException(
@@ -27,7 +30,9 @@ export class GeminiService {
     }
 
     const selectedModel =
-      model ?? process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
+      model ??
+      this.configService.get<string>('GEMINI_MODEL') ??
+      'gemini-2.5-flash';
     const google = createGoogleGenerativeAI({ apiKey });
     const languageModel = google(selectedModel);
 

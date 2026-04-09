@@ -1,4 +1,4 @@
-import { StoryChunkVariantsDto } from '../dto/story.dto';
+import { StoryChunkVariantsDto } from '../../presentation/dto/story.dto';
 import { isStoryInitializationResponse } from './story-initialization-system-prompt';
 
 export const storyContinuationResponseExample: StoryChunkVariantsDto = {

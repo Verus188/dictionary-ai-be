@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
 interface OpenRouterGenerateParams {
@@ -24,8 +25,10 @@ export class OpenRouterService {
     'stepfun/step-3.5-flash:free',
   ];
 
+  constructor(private readonly configService: ConfigService) {}
+
   async generate({ prompt, temperature }: OpenRouterGenerateParams) {
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = this.configService.get<string>('OPENROUTER_API_KEY');
 
     if (!apiKey) {
       throw new InternalServerErrorException(
