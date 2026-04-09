@@ -282,7 +282,6 @@ client → backend → AI provider
 
 Используемые AI провайдеры:
 
-- Gemini
 - OpenRouter
 
 Пользователи **не используют собственные AI ключи**.
@@ -341,7 +340,6 @@ Frontend:
 
 AI провайдеры:
 
-- Gemini
 - OpenRouter
 
 ---
