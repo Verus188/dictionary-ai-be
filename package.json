@@ -7,6 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres adminer",
+    "db:up": "docker compose up -d postgres adminer",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
