@@ -1,4 +1,5 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, ServiceUnavailableException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { RegisterUseCase } from './register.use-case';
 import { AuthUsersRepository } from '../../infrastructure/repositories/auth-users.repository';
 import { PasswordHasherService } from '../../infrastructure/services/password-hasher.service';
@@ -86,5 +87,28 @@ describe('RegisterUseCase', () => {
         password: 'supersecret',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('throws a service unavailable error when auth storage is not initialized', async () => {
+    authUsersRepository.findUserByEmail.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError(
+        'The table `public.users` does not exist in the current database.',
+        {
+          code: 'P2021',
+          clientVersion: '7.7.0',
+          meta: {
+            modelName: 'User',
+          },
+        },
+      ),
+    );
+
+    await expect(
+      useCase.execute({
+        name: 'Nikita',
+        email: 'nikita@example.com',
+        password: 'secret6',
+      }),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 });

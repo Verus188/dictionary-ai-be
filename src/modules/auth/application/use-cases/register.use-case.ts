@@ -6,6 +6,7 @@ import { PasswordHasherService } from '../../infrastructure/services/password-ha
 import { AuthTokenService } from '../../infrastructure/services/auth-token.service';
 import { AuthResponse } from '../types/auth-response.type';
 import { normalizeEmail } from '../helpers/normalize-email';
+import { rethrowAuthPersistenceError } from '../../infrastructure/prisma/rethrow-auth-persistence-error';
 
 @Injectable()
 export class RegisterUseCase {
@@ -17,17 +18,18 @@ export class RegisterUseCase {
 
   async execute(request: RegisterDto): Promise<AuthResponse> {
     const email = normalizeEmail(request.email);
-    const existingUser = await this.authUsersRepository.findUserByEmail(email);
-
-    if (existingUser) {
-      throw new ConflictException('email is already in use');
-    }
-
-    const passwordHash = await this.passwordHasherService.hash(
-      request.password,
-    );
 
     try {
+      const existingUser = await this.authUsersRepository.findUserByEmail(email);
+
+      if (existingUser) {
+        throw new ConflictException('email is already in use');
+      }
+
+      const passwordHash = await this.passwordHasherService.hash(
+        request.password,
+      );
+
       const user = await this.authUsersRepository.createUser({
         name: request.name.trim(),
         email,
@@ -46,7 +48,7 @@ export class RegisterUseCase {
         throw new ConflictException('email is already in use');
       }
 
-      throw error;
+      rethrowAuthPersistenceError(error);
     }
   }
 }
