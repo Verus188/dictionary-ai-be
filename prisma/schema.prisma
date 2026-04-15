@@ -6,6 +6,21 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SyncEntityType {
+  dictionaryCard
+  setting
+}
+
+enum SyncOperationType {
+  upsert
+  delete
+}
+
+enum SyncAppliedResultKind {
+  result
+  conflict
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -14,5 +29,75 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  dictionaryCards    UserDictionaryCard[]
+  settings           UserSetting[]
+  syncAppliedOps     SyncAppliedOperation[]
+  syncChangeLogItems SyncChangeLog[]
+
   @@map("users")
+}
+
+model UserDictionaryCard {
+  id             String   @id
+  userId         String   @map("user_id")
+  card           String
+  normalizedCard String   @map("normalized_card")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+  serverRevision BigInt   @map("server_revision") @db.BigInt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, normalizedCard])
+  @@index([userId, deletedAt])
+  @@index([userId, serverRevision])
+  @@map("user_dictionary_cards")
+}
+
+model UserSetting {
+  userId         String   @map("user_id")
+  settingKey     String   @map("setting_key")
+  value          Json?
+  updatedAt      DateTime @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+  serverRevision BigInt   @map("server_revision") @db.BigInt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, settingKey])
+  @@index([userId, serverRevision])
+  @@map("user_settings")
+}
+
+model SyncAppliedOperation {
+  userId        String                @map("user_id")
+  deviceId      String                @map("device_id")
+  operationId   String                @map("operation_id")
+  entityType    SyncEntityType        @map("entity_type")
+  entityId      String                @map("entity_id")
+  appliedAt     DateTime              @default(now()) @map("applied_at")
+  resultKind    SyncAppliedResultKind @map("result_kind")
+  resultPayload Json                  @map("result_payload")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, deviceId, operationId])
+  @@index([userId, deviceId, appliedAt])
+  @@map("sync_applied_operations")
+}
+
+model SyncChangeLog {
+  cursor     BigInt            @id @db.BigInt
+  userId     String            @map("user_id")
+  entityType SyncEntityType    @map("entity_type")
+  entityId   String            @map("entity_id")
+  changeType SyncOperationType @map("change_type")
+  payload    Json
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, cursor])
+  @@map("sync_change_log")
 }

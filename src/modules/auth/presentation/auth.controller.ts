@@ -4,9 +4,9 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterUseCase } from '../application/use-cases/register.use-case';
 import { LoginUseCase } from '../application/use-cases/login.use-case';
 import { GetCurrentUserUseCase } from '../application/use-cases/get-current-user.use-case';
-import { CurrentUser } from './decorators/current-user.decorator';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import type { AuthenticatedRequestUser } from '../application/types/authenticated-request-user.type';
+import { CurrentUser } from '../../../common/auth/current-user.decorator';
+import { JwtAuthGuard } from '../../../common/auth/jwt-auth.guard';
+import type { AuthenticatedRequestUser } from '../../../common/auth/authenticated-request-user.type';
 
 @Controller('auth')
 export class AuthController {
